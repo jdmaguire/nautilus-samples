@@ -1,15 +1,20 @@
 /*
  * Copyright (c) 2017 Dell Inc., or its subsidiaries. All Rights Reserved.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  *   http://www.apache.org/licenses/LICENSE-2.0
- *   
+ *
  */
  buildscript {
     repositories {
+        if (findProperty("repositoryUrl")) {
+            maven {
+                url findProperty("repositoryUrl")
+            }
+        }
         jcenter()
     }
 }
@@ -21,11 +26,17 @@ plugins {
 allprojects {
     apply plugin: "idea"
     apply plugin: "eclipse"
-}
 
-subprojects {
+    group "io.pravega.nautilus-samples"
+    version projectVersion
+
     repositories {
-        mavenLocal()
+        if (findProperty("repositoryUrl")) {
+            maven {
+                url findProperty("repositoryUrl")
+            }
+        }
+
         jcenter()
         mavenCentral()
         maven {
@@ -35,12 +46,11 @@ subprojects {
             url "https://oss.sonatype.org/content/repositories/snapshots"
         }
     }
-    
-    plugins.withType(org.gradle.api.plugins.JavaPlugin) {
-        group "io.pravega"
-        version samplesVersion
-    }
+    apply from: "${rootDir}/gradle/java.gradle"
+    apply from: "${rootDir}/gradle/publishing.gradle"
+}
 
+subprojects {
     remotes {
         dcos {
             host = dcosAddress
@@ -55,6 +65,33 @@ subprojects {
     afterEvaluate {
         task upload(type: Exec, dependsOn: installDist) {
             commandLine 'rsync', '-az', project.installDist.destinationDir, "${remotes.dcos.user}@${remotes.dcos.host}:~"
+        }
+    }
+}
+
+task sourceZip(type: Zip) {
+    from projectDir
+    destinationDir = buildDir
+
+    baseName = "nautilus-samples"
+    version = project.version
+    classifier = 'source'
+
+    exclude "gradlew*"
+    exclude "gradle/wrapper/**"
+    exclude ".gradle/"
+    exclude "**/build/**"
+    exclude "**/out/**"
+    exclude "**/*.ipr"
+    exclude "**/*.iws"
+    exclude "**/*.iml"
+}
+
+apply plugin: "maven-publish"
+publishing {
+    publications {
+        allSource(MavenPublication) {
+            artifact sourceZip
         }
     }
 }
