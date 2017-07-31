@@ -27,7 +27,7 @@ allprojects {
     apply plugin: "idea"
     apply plugin: "eclipse"
 
-    group "io.pravega.nautilus-samples"
+    group "io.pravega.samples"
     version projectVersion
 
     repositories {
