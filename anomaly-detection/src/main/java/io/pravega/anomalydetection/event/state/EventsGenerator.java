@@ -6,6 +6,7 @@
 package io.pravega.anomalydetection.event.state;
 
 import org.apache.flink.api.java.tuple.Tuple2;
+import org.apache.flink.shaded.com.google.common.collect.Lists;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,6 +18,7 @@ public class EventsGenerator {
 
 	private static final Logger LOG = LoggerFactory.getLogger(EventsGenerator.class);
 
+	private static final List<String> cityNames = Lists.newArrayList(City.CITIES.keySet());
 	//private double errorProb = 0.0000001;
 
 	private final double errorProb;
@@ -73,7 +75,7 @@ public class EventsGenerator {
 			while (i < numToSkip) {
 				i += 1;
 				iter.next();
-			};
+			}
 
 			Map.Entry<Integer,EventStateMachine.State> entry = iter.next();
 			int address = entry.getKey();
@@ -129,42 +131,11 @@ public class EventsGenerator {
 	}
 
 	private String getNetworkId() {
-		int randomNum = ThreadLocalRandom.current().nextInt(1, 5);
-		return Integer.toString(randomNum);
+		int randomNum = ThreadLocalRandom.current().nextInt(0, cityNames.size() - 1);
+		return cityNames.get(randomNum);
 	}
 
 	private Event.LatLon getLatLon(String networkId) {
-
-		Event.LatLon latlon;
-
-		switch (networkId) {
-			case "1":
-				latlon = new Event.LatLon(37.3860517,  	-122.0838511);
-				break;
-			case "2":
-				latlon = new Event.LatLon(40.7127837,  	-74.0059413);
-				break;
-			case "3":
-				latlon = new Event.LatLon(51.5073509,  	-0.1277583);
-				break;
-			case "4":
-				latlon = new Event.LatLon(35.7090259,  	139.73199249999993);
-				break;
-			case "5":
-				latlon = new Event.LatLon(25.2048493,  	55.2707828);
-				break;
-			default:
-				latlon = new Event.LatLon( 	39.3209801,  	-111.09373110000001);
-				break;
-		}
-
-		/*
-		Random r = new Random();
-		return new Event.LatLon((r.nextDouble() * -180.0) + 90.0,
-				(r.nextDouble() * -360.0) + 180.0);
-				*/
-		return latlon;
+		return City.CITIES.get(networkId);
 	}
-
-
 }

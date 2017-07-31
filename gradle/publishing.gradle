@@ -1,0 +1,18 @@
+
+plugins.withId('maven-publish') {
+    if (findProperty('publishUrl')) {
+        publishing {
+            repositories {
+                maven {
+                    url findProperty('publishUrl')
+                    if (findProperty('publishUsername') && findProperty('publishPassword')) {
+                        credentials {
+                            username findProperty('publishUsername')
+                            password findProperty('publishPassword')
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

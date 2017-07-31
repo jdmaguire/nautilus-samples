@@ -23,6 +23,10 @@ public class ApplicationMain {
 		PipelineRunner runner = new PipelineRunner();
 		runner.run(args);
 		LOG.info("Ending Application Main...");
-		System.exit(0);
+
+		if (ApplicationMain.class.getClassLoader().getClass().getName().contains("AppClassLoader")) {
+			LOG.info("Exiting...");
+			System.exit(0);
+		}
 	}
 }

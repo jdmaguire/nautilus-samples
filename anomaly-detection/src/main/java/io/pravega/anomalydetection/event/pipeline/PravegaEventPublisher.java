@@ -33,13 +33,10 @@ public class PravegaEventPublisher extends AbstractPipeline {
 	}
 
 	private void publishUsingFlinkConnector(AppConfiguration appConfiguration) throws Exception {
-
 		StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
 		StreamId streamId = getStreamId();
 		FlinkPravegaWriter<Event> writer = pravega.newWriter(streamId, Event.class, new EventRouter());
-
-		int parallelism = appConfiguration.getPipeline().getParallelism();
 
 		if(appConfiguration.getProducer().isControlledEnv()) {
 			if(!(env instanceof LocalStreamEnvironment)) {
@@ -52,13 +49,11 @@ public class PravegaEventPublisher extends AbstractPipeline {
 			ControlledSourceContextProducer controlledSourceContextProducer = new ControlledSourceContextProducer(capacity, latency);
 			env.addSource(controlledSourceContextProducer).name("EventSource").addSink(writer).name("Pravega-" + streamId.getName());
 		} else {
-			env.setParallelism(parallelism);
 			SourceContextProducer sourceContextProducer = new SourceContextProducer(appConfiguration);
 			env.addSource(sourceContextProducer).name("EventSource").addSink(writer).name("Pravega-" + streamId.getName());
 		}
 
 		env.execute(appConfiguration.getName()+"-producer");
-
 	}
 
 	public static class EventRouter implements PravegaEventRouter<Event> {

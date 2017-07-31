@@ -1,0 +1,45 @@
+{
+  "mappings": {
+    "@@type@@": {
+      "properties": {
+        "count": {
+          "type": "integer",
+          "index": false
+        },
+        "ipAddress": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
+        },
+        "location": {
+          "type": "geo_point"
+        },
+        "maxTimestamp": {
+          "type": "long"
+        },
+        "maxTimestampAsString": {
+          "type": "date"
+        },
+        "minTimestamp": {
+          "type": "long"
+        },
+        "minTimestampAsString": {
+          "type": "date"
+        },
+        "networkId": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
+        }
+      }
+    }
+  }
+}

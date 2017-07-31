@@ -31,6 +31,8 @@ import org.apache.flink.streaming.connectors.elasticsearch.RequestIndexer;
 import org.apache.flink.streaming.connectors.elasticsearch5.ElasticsearchSink;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.client.Requests;
+
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.time.Instant;
 import java.util.*;
@@ -46,15 +48,14 @@ public class PravegaAnomalyDetectionProcessor extends AbstractPipeline {
 
 	@Override
 	public void run() throws Exception {
-
 		// Configure the Pravega event reader
 		long startTime = 0;
 		FlinkPravegaReader<Event> flinkPravegaReader = pravega.newReader(getStreamId(), startTime, Event.class);
 
 		// Configure the Flink job environment
 		StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+
 		env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
-		env.setParallelism(appConfiguration.getPipeline().getParallelism());
 		if(!appConfiguration.getPipeline().isDisableCheckpoint()) {
 			long checkpointInterval = appConfiguration.getPipeline().getCheckpointIntervalInMilliSec();
 			env.enableCheckpointing(checkpointInterval, CheckpointingMode.EXACTLY_ONCE);
@@ -64,14 +65,12 @@ public class PravegaAnomalyDetectionProcessor extends AbstractPipeline {
 
 		// 1. read network events
 		DataStream<Event> events = env.addSource(flinkPravegaReader).name("AnomalyEventReader");
-		events.print();
 
 		// 2. detect anomalies in event sequences
 		DataStream<Event.Alert> anomalies = events
 				.keyBy("sourceAddress")
 				.flatMap(new EventStateMachineMapper())
 				.name("AnomalyDetector");
-		anomalies.print();
 
 		// 3. aggregate the alerts by network over time
 		long maxOutOfOrderness = appConfiguration.getPipeline().getWatermarkOffsetInSec();
@@ -85,7 +84,6 @@ public class PravegaAnomalyDetectionProcessor extends AbstractPipeline {
 				.window(TumblingEventTimeWindows.of(Time.seconds(windowIntervalInSeconds)))
 				.fold(new Result(), new FoldAlertsToResult())
 				.name("Aggregate");
-		aggregate.print();
 
 		// 4. emit the alerts to Elasticsearch (optional)
 		if(appConfiguration.getPipeline().getElasticSearch().isSinkResults()) {
@@ -150,11 +148,8 @@ public class PravegaAnomalyDetectionProcessor extends AbstractPipeline {
 		config.put("cluster.name", cluster);
 		config.put("client.transport.sniff", "false");
 
-		final InetSocketAddress socketAddress = new InetSocketAddress(host,port);
-
 		List<InetSocketAddress> transports = new ArrayList<>();
-		transports.add(socketAddress);
-
+		transports.add(new InetSocketAddress(InetAddress.getByName(host), port));
 
 		return new ElasticsearchSink (config, transports, new ResultSinkFunction(index, type));
 	}
