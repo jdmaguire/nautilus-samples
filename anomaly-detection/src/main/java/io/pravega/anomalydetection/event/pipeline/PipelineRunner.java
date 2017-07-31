@@ -12,52 +12,53 @@ package io.pravega.anomalydetection.event.pipeline;
 
 import io.pravega.anomalydetection.event.AppConfiguration;
 import io.pravega.connectors.flink.util.FlinkPravegaParams;
-import io.pravega.shaded.com.google.gson.Gson;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.Arrays;
 
 public class PipelineRunner {
 
 	private static final Logger LOG = LoggerFactory.getLogger(PipelineRunner.class);
 
-	private static final String configFile = "app.json";
-
 	private AppConfiguration appConfiguration;
 	private FlinkPravegaParams pravega;
-	private int runMode;
+	private String runMode;
 
 	private void parseConfigurations(String[] args) {
-
 		LOG.info("ApplicationMain Main.. Arguments: {}", Arrays.asList(args));
 
-		ParameterTool parameterTool = ParameterTool.fromArgs(args);
-		LOG.info("Parameter Tool: {}", parameterTool.toMap());
+		ParameterTool params = ParameterTool.fromArgs(args);
+		LOG.info("Parameter Tool: {}", params.toMap());
 
-		if(parameterTool.getNumberOfParameters() != 2) {
-			printUsage();
-			System.exit(1);
-		}
+		AppConfiguration.Producer producer = new AppConfiguration.Producer();
+		producer.setLatencyInMilliSec(params.getLong("producer-latency", 2L));
+		producer.setCapacity(params.getInt("producer-capacity", 100));
+		producer.setErrorProbFactor(params.getDouble("producer-error-factor", 0.3));
+		producer.setControlledEnv(params.getBoolean("producer-controlled", false));
 
-		String configDirPath = parameterTool.getRequired("configDir");
-		try {
-			byte[] configurationData = Files.readAllBytes(Paths.get(configDirPath + File.separator + configFile));
-			String jsonData = new String(configurationData);
-			LOG.info("App Configurations raw data: {}", jsonData);
-			Gson gson = new Gson();
-			appConfiguration = gson.fromJson(jsonData, AppConfiguration.class);
-		} catch (IOException e) {
-			LOG.error("Could not read {}",configFile, e);
-			System.exit(1);
-		}
+		AppConfiguration.ElasticSearch elasticSearch = new AppConfiguration.ElasticSearch();
+		elasticSearch.setSinkResults(params.getBoolean("elastic-sink", true));
+		elasticSearch.setHost(params.get("elastic-host", "master.elastic.l4lb.thisdcos.directory"));
+		elasticSearch.setPort(params.getInt("elastic-port", 9300));
+		elasticSearch.setCluster(params.get("elastic-cluster", "elastic"));
+		elasticSearch.setIndex(params.get("elastic-index", "anomaly-index"));
+		elasticSearch.setType(params.get("elastic-type", "anomalies"));
 
-		runMode = parameterTool.getInt("mode");
+		AppConfiguration.Pipeline pipeline = new AppConfiguration.Pipeline();
+		pipeline.setCheckpointIntervalInMilliSec(params.getLong("pipeline-checkpoint-interval", 1000L));
+		pipeline.setDisableCheckpoint(params.getBoolean("pipeline-disable-checkpoint", false));
+		pipeline.setWatermarkOffsetInSec(params.getInt("pipeline-watermark-offset", 0));
+		pipeline.setWindowIntervalInSeconds(params.getInt("pipeline-window-interval", 5));
+		pipeline.setElasticSearch(elasticSearch);
+
+		appConfiguration = new AppConfiguration();
+		appConfiguration.setName(params.get("name", "anomaly-detection"));
+		appConfiguration.setProducer(producer);
+		appConfiguration.setPipeline(pipeline);
+
+		runMode = params.get("mode", "processor");
 
 		pravega = new FlinkPravegaParams(ParameterTool.fromArgs(args));
 	}
@@ -65,31 +66,29 @@ public class PipelineRunner {
 	private void printUsage() {
 		StringBuilder message = new StringBuilder();
 		message.append("\n############################################################################################################\n");
-		message.append("Usage: com.emc.pravega.ApplicationMain --configDir <app.json file location> --mode <1 or 2 or 3>").append("\n");
-		message.append("Mode 1 == Create pravega stream as defined in the configuration file").append("\n");
-		message.append("Mode 2 == Publish streaming events to Pravega").append("\n");
-		message.append("Mode 3 == Run Anomaly Detection by reading from Pravega stream").append("\n");
+		message.append("Usage: io.pravega.anomalydetection.ApplicationMain --mode <producer or processor>").append("\n");
+		message.append("producer  == Publish streaming events to Pravega").append("\n");
+		message.append("processor == Run Anomaly Detection by reading from Pravega stream").append("\n");
 		message.append("############################################################################################################");
 		LOG.error("{}", message.toString());
 	}
 
 
 	public void run(String[] args) {
-
 		parseConfigurations(args);
 
 		try {
+			new StreamCreator(appConfiguration, pravega).run();
+
 			AbstractPipeline pipeline = null;
 			switch (runMode) {
-				case 1:
-					LOG.info("Going to create Pravega stream");
-					pipeline = new StreamCreator(appConfiguration, pravega);
-					break;
-				case 2:
+				case "producer":
 					LOG.info("Running event publisher to publish events to Pravega stream");
 					pipeline = new PravegaEventPublisher(appConfiguration, pravega);
 					break;
-				case 3:
+				case "processor":
+					new ElasticSetup(appConfiguration).run();
+
 					LOG.info("Running anomaly detection by reading from Pravega stream");
 					pipeline = new PravegaAnomalyDetectionProcessor(appConfiguration, pravega);
 					break;

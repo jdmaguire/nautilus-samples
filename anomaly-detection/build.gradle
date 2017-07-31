@@ -14,14 +14,10 @@ plugins {
 }
 
 apply plugin: "java"
-apply plugin: "distribution"
 apply plugin: 'application'
-apply plugin: 'maven-publish'
 
 mainClassName = 'io.pravega.anomalydetection.ApplicationMain'
 applicationDefaultJvmArgs = ["-Dlog4j.configuration=file:conf/log4j.properties"]
-
-archivesBaseName = 'pravega-flink-anomaly-detection'
 
 dependencies {
     compile "org.slf4j:slf4j-log4j12:1.6.1"
@@ -93,7 +89,6 @@ shadowJar {
 
 distributions {
     main {
-        baseName = archivesBaseName
         contents {
             into('lib') {
                 from shadowJar
