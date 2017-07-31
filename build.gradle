@@ -73,7 +73,7 @@ task sourceZip(type: Zip) {
     from projectDir
     destinationDir = buildDir
 
-    baseName = "nautilus-samples"
+    baseName = rootProject.name
     version = project.version
     classifier = 'source'
 
