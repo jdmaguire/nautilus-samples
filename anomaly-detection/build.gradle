@@ -9,12 +9,9 @@
  *
  */
 
-plugins {
-    id 'com.github.johnrengelman.shadow' version '1.2.4'
-}
-
 apply plugin: "java"
 apply plugin: 'application'
+apply plugin: 'com.github.johnrengelman.shadow'
 
 mainClassName = 'io.pravega.anomalydetection.ApplicationMain'
 applicationDefaultJvmArgs = ["-Dlog4j.configuration=file:conf/log4j.properties"]
