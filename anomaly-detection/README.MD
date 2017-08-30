@@ -46,7 +46,7 @@ Follow the below steps to build the sample code:
 
 ```
 $ git clone https://github.com/pravega/nautilus-samples.git
-$ cd pravega-samples
+$ cd nautilus-samples
 $ ./gradlew clean installDist
 ```
 
