@@ -122,7 +122,9 @@ public class PipelineRunner {
 					pipeline = new PravegaEventPublisher(appConfiguration, pravega);
 					break;
 				case "processor":
-					new ElasticSetup(appConfiguration).run();
+					if (appConfiguration.getPipeline().getElasticSearch().isSinkResults()) {
+						new ElasticSetup(appConfiguration).run();
+					}
 
 					LOG.info("Running anomaly detection by reading from Pravega stream");
 					pipeline = new PravegaAnomalyDetectionProcessor(appConfiguration, pravega);
