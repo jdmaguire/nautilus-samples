@@ -26,31 +26,7 @@ The following diagram depicts the state machine used in this example.
 
 ## Getting Started
 
-### Build Pravega & Flink Connectors
-
-Follow the steps below to build and publish artifacts from source to local Maven repository.
-
-```
-$ git clone https://github.com/pravega/pravega.git
-$ ./gradlew clean install
-
-$ git clone https://github.com/pravega/flink-connectors.git
-$ ./gradlew clean install
-```
-
-Alternatively, follow the instructions from [here](http://pravega.io/docs/getting-started/) to pull from release repository.
-
-### Build the Sample Code
-
-Follow the below steps to build the sample code:
-
-```
-$ git clone https://github.com/pravega/nautilus-samples.git
-$ cd nautilus-samples
-$ ./gradlew clean installDist
-```
-
-This should produce these two main artifacts:
+Building the code (instructions in the [parent README.md](../README.md)) provides two main artifacts for this sample:
 
 * A JAR of the Flink application that can be uploaded to Nautilus: `anomaly-detection/build/libs/anomaly-detection-0.1.0-SNAPSHOT-all.jar`
 * A distribution directory that includes everything (minus Java) needed to run this application outside of Flink: `anomaly-detection/build/install/anomaly-detection/`
@@ -74,8 +50,7 @@ This application is configured via command line arguments using [Flink's Paramet
 
 The default argument values are optimized to run in Nautilus. Find a full reference and the default values in [PipelineRunner::parseConfigurations](src/main/java/io/pravega/anomalydetection/event/pipeline/PipelineRunner.java).
 
-
-## Running in Nautilus
+## Running in Nautilus (from the UI)
 
 To run this example in Nautilus, you will have to create two applications:
 
@@ -154,3 +129,50 @@ Now that you have a processor and producer running, from Nautilus you can go to 
 Once in Kibana, click on _Visualize_ => _Anomaly Demo_. Final results:
 
 ![Kibana Screenshot](./src/main/resources/Network-Anomaly.png?raw=true "Kibana Screenshot")
+
+## Running in Nautilus (from the Command Line)
+
+First you should install the `nautilus` command line from the UI by selecting the "Download CLI" option from the user menu.
+
+### Setup
+
+Before you can do anything with the CLI you need to target your Nautilus cluster and log in.
+
+```
+nautilus target --insecure [IP]
+nautilus login
+```
+
+You either need to create a new project or lookup the ID of an existing project. This can be done by one of these commands.
+
+```
+# Create the project
+export PROJECT_ID=$(nautilus project create anomaly --cpus 5 --mem 7)
+
+# If you project already exists, look it up
+export PROJECT_ID=$(nautilus project lookup anomaly)
+```
+
+Wait for the project deployment to complete. This may take a few minutes.
+
+### Create and Launch the App
+
+Upload the anomaly detection artifact:
+
+```
+nautilus artifact upload io.pravega:anomaly-detection:0.1 anomaly-detection/build/libs/anomaly-detection-0.1.0-SNAPSHOT-all.jar
+```
+
+Create and launch the processor app
+
+```
+export PROCESSOR_ID=$(nautilus app create anomaly-processor)
+nautilus app launch --artifact io.pravega:anomaly-detection:0.1 $PROCESSOR_ID
+```
+
+Create and launch the producer app
+
+```
+export PRODUCER_ID=$(nautilus app create anomaly-producer)
+nautilus app launch --artifact io.pravega:anomaly-detection:0.1 -p mode=producer $PRODUCER_ID
+```
