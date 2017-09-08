@@ -12,9 +12,11 @@ Follow the steps below to build and publish artifacts from source to local Maven
 
 ```
 $ git clone https://github.com/pravega/pravega.git
+$ cd pravega
 $ ./gradlew clean install
 
 $ git clone https://github.com/pravega/flink-connectors.git
+$ cd flink-connectors
 $ ./gradlew clean install
 ```
 
