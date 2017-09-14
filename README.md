@@ -11,11 +11,11 @@ Building the samples will compile against the Pravega 0.1.0 and 0.1.0 Connectors
 Follow the steps below to build and publish artifacts from source to local Maven repository.
 
 ```
-$ git clone https://github.com/pravega/pravega.git
+$ git clone --branch v0.1.0 https://github.com/pravega/pravega.git
 $ cd pravega
 $ ./gradlew clean install
 
-$ git clone https://github.com/pravega/flink-connectors.git
+$ git clone --branch v0.1.0 https://github.com/pravega/flink-connectors.git
 $ cd flink-connectors
 $ ./gradlew clean install
 ```
