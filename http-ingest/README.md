@@ -8,7 +8,7 @@ By default the webapp listens on port 9099 but that is configurable. The app pro
 
 ## POST /{scope}/{stream}?key={key}
 
-Ingests the payload into Pravega. This will create the stream if it does not already exist and ingest the raw content of the http payload into Pravega.
+Ingests the payload into Pravega. This will create the stream if it does not already exist and ingest the raw content of the http request body into Pravega.
 
 Parameters:
 
@@ -48,7 +48,7 @@ Then you can run the deploy script to deploy the app to marathon. This script wi
 You can now test out the app by running the following curl command from the Nautilus cluster.
 
 ```
-curl -d "Hello World!" "http://httpingest.marathon.mesos:9099/example/ingest?key=hello"
+curl -d "Hello World!" "http://http-ingest.marathon.mesos:9099/example/ingest?key=hello"
 ```
 
 Try this out using different messages, keys and streams.
