@@ -10,3 +10,10 @@ dependencies {
             "io.dropwizard:dropwizard-core:${dropwizardVersion}",
             "io.pravega:pravega-client:${pravegaVersion}"
 }
+
+task assembleLib(type: Copy) {
+    into "${buildDir}/lib"
+    from project.configurations.runtime
+    from project.configurations.runtime.allArtifacts.files
+}
+assemble.dependsOn assembleLib

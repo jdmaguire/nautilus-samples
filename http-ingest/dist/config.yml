@@ -1,13 +1,12 @@
 server:
   applicationConnectors:
    - type: http
-     port: 8080
+     port: 9099
   adminConnectors:
     - type: http
-      port: 8081
+      port: 9098
 
 logging:
   level: INFO
 
-pravegaControllerUri: "tcp://localhost:9090"
-#pravegaControllerUri: "tcp://controller.pravega.l4lb.thisdcos.directory:9091"
+pravegaControllerUri: "tcp://controller.pravega.l4lb.thisdcos.directory:9091"
