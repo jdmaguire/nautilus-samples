@@ -6,7 +6,7 @@
   "container": {
     "type": "DOCKER",
     "docker": {
-      "image": "master.mesos:5000/httpingest:latest",
+      "image": "master.mesos:5000/http-ingest:latest",
       "network": "HOST",
       "forcePullImage": true
     },

@@ -6,7 +6,7 @@ if [ -z "${TARGET}" ]; then
     exit 1
 fi
 
-IMAGE_REPO=httpingest:latest
+IMAGE_REPO=http-ingest:latest
 
 set +ex
 
@@ -16,4 +16,4 @@ docker build -t $IMAGE_REPO .
 docker tag $IMAGE_REPO $TARGET:5000/$IMAGE_REPO
 docker push $TARGET:5000/$IMAGE_REPO
 
-dcos marathon app add httpingest-marathon.json
+dcos marathon app add http-ingest-marathon.json
