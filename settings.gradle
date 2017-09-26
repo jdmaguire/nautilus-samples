@@ -12,4 +12,4 @@ rootProject.name = 'nautilus-samples'
 
 include 'anomaly-detection'
 include 'sanity-samples'
-
+include 'http-ingest'

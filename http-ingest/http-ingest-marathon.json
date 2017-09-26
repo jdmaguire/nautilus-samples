@@ -1,0 +1,24 @@
+{
+  "id": "/http-ingest",
+  "instances": 1,
+  "cpus": 0.1,
+  "mem": 1024,
+  "container": {
+    "type": "DOCKER",
+    "docker": {
+      "image": "master.mesos:5000/http-ingest:latest",
+      "network": "HOST",
+      "forcePullImage": true
+    },
+    "portDefinitions": [
+      {
+        "protocol": "tcp",
+        "port": 9099
+      }
+    ]
+  },
+  "ipAddress": {
+    "networkName": "dcos"
+  }
+}
+

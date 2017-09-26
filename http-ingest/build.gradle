@@ -1,0 +1,19 @@
+apply plugin: 'java'
+apply plugin: 'kotlin'
+apply plugin: 'application'
+
+mainClassName = 'io.pravega.ingest.IngestApp'
+
+dependencies {
+    compile "org.slf4j:slf4j-api:1.7.3",
+            "org.jetbrains.kotlin:kotlin-stdlib:${kotlin_version}",
+            "io.dropwizard:dropwizard-core:${dropwizardVersion}",
+            "io.pravega:pravega-client:${pravegaVersion}"
+}
+
+task assembleLib(type: Copy) {
+    into "${buildDir}/lib"
+    from project.configurations.runtime
+    from project.configurations.runtime.allArtifacts.files
+}
+assemble.dependsOn assembleLib
