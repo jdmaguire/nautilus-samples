@@ -15,11 +15,13 @@ buildscript {
                 url findProperty("repositoryUrl")
             }
         }
-        maven {
-            url "https://plugins.gradle.org/m2/"
+        else {
+            maven {
+                url "https://plugins.gradle.org/m2/"
+            }
+            jcenter()
+            mavenCentral()
         }
-        jcenter()
-        mavenCentral()
     }
 
     dependencies {
@@ -41,14 +43,15 @@ allprojects {
                 url findProperty("repositoryUrl")
             }
         }
-
-        jcenter()
-        mavenCentral()
-        maven {
-            url "https://repository.apache.org/snapshots"
-        }
-        maven {
-            url "https://oss.sonatype.org/content/repositories/snapshots"
+        else {
+            jcenter()
+            mavenCentral()
+            maven {
+                url "https://repository.apache.org/snapshots"
+            }
+            maven {
+                url "https://oss.sonatype.org/content/repositories/snapshots"
+            }
         }
     }
     apply from: "${rootDir}/gradle/java.gradle"
