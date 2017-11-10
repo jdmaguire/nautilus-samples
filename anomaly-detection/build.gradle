@@ -1,3 +1,4 @@
+
 /*
  * Copyright (c) 2017 Dell Inc., or its subsidiaries. All Rights Reserved.
  *
@@ -17,6 +18,12 @@ mainClassName = 'io.pravega.anomalydetection.ApplicationMain'
 applicationDefaultJvmArgs = ["-Dlog4j.configuration=file:conf/log4j.properties"]
 
 dependencies {
+    compile group: 'io.pravega', name: 'pravega-client', version: pravegaVersion
+    compile group: 'io.pravega', name: 'pravega-common', version: pravegaVersion
+    compile group: 'io.pravega', name: 'pravega-shared', version: pravegaVersion
+    compile group: 'io.pravega', name: 'pravega-shared-metrics', version: pravegaVersion
+    compile group: 'io.pravega', name: 'pravega-shared-protocol', version: pravegaVersion
+    compile group: 'io.pravega', name: 'pravega-shared-controller-api', version: pravegaVersion
     compile "org.slf4j:slf4j-log4j12:1.6.1"
     compile "io.pravega:pravega-connectors-flink_2.11:${pravegaConnectorsVersion}"
     compile "org.apache.flink:flink-streaming-java_2.11:${flinkVersion}"
@@ -25,6 +32,14 @@ dependencies {
 
 shadowJar {
     dependencies {
+        // Overwrite Flink connector Pravega version
+        include dependency("io.pravega:pravega-client:${pravegaVersion}")
+        include dependency("io.pravega:pravega-common:${pravegaVersion}")
+        include dependency("io.pravega:pravega-shared:${pravegaVersion}")
+        include dependency("io.pravega:pravega-shared-metrics:${pravegaVersion}")
+        include dependency("io.pravega:pravega-shared-protocol:${pravegaVersion}")
+        include dependency("io.pravega:pravega-shared-controller-api:${pravegaVersion}")
+
         include dependency("io.pravega:pravega-connectors-flink_2.11")
 
         //All below dependencies are from Elastic Search 5 connector
