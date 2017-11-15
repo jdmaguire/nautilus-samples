@@ -68,8 +68,7 @@ public class EventCounterApp {
 
 		// Pravega Writer
 		FlinkExactlyOncePravegaWriter<Integer> pravegaExactlyOnceWriter = streamUtils.newExactlyOnceWriter(outStreamId,
-				Integer.class, new IdentityRouter<>(),
-				txTimeout, txTimeoutMax, txTimeoutGracePeriod);
+				Integer.class, new IdentityRouter<>());
 
 		env
 				.addSource(new IntegerCounterSourceGenerator(numElements))
@@ -115,8 +114,7 @@ public class EventCounterApp {
 
 		// Pravega Writer
 		FlinkExactlyOncePravegaWriter<Integer> pravegaExactlyOnceWriter = streamUtils.newExactlyOnceWriter(outStreamId,
-				Integer.class, new IdentityRouter<>(),
-				txTimeout, txTimeoutMax, txTimeoutGracePeriod);
+				Integer.class, new IdentityRouter<>());
 
 		DataStream<Integer> stream =
 		env.addSource(pravegaSource)
