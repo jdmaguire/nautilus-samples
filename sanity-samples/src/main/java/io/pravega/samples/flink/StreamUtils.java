@@ -88,21 +88,14 @@ public class StreamUtils {
 	// TODO move these methods to FlinkPravegaParams class
 	public <T extends Serializable> FlinkExactlyOncePravegaWriter<T> newExactlyOnceWriter(final StreamId stream,
 																	final Class<T> eventType,
-																	final PravegaEventRouter<T> router,
-																						  final long txTimeout,
-																						  final long txTimeoutMax,
-																						  final long txTimeoutGracePeriod) {
-		return newExactlyOnceWriter(stream, PravegaSerialization.serializationFor(eventType), router, txTimeout, txTimeoutMax, txTimeoutGracePeriod);
+																	final PravegaEventRouter<T> router) {
+		return newExactlyOnceWriter(stream, PravegaSerialization.serializationFor(eventType), router);
 	}
 
 	public <T extends Serializable> FlinkExactlyOncePravegaWriter<T> newExactlyOnceWriter(final StreamId stream,
 																			   final SerializationSchema<T> serializationSchema,
-																			   final PravegaEventRouter<T> router,
-																						  final long txTimeout,
-																						  final long txTimeoutMax,
-																						  final long txTimeoutGracePeriod) {
-		return new FlinkExactlyOncePravegaWriter<>(getControllerUri(), stream.getScope(), stream.getName(),
-				serializationSchema, router, txTimeout, txTimeoutMax, txTimeoutGracePeriod);
+																			   final PravegaEventRouter<T> router) {
+		return new FlinkExactlyOncePravegaWriter<T>(getControllerUri(), stream.getScope(), stream.getName(), serializationSchema, router);
 	}
 
 
