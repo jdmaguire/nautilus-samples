@@ -14,8 +14,9 @@ import io.pravega.client.ClientFactory;
 import io.pravega.client.admin.ReaderGroupManager;
 import io.pravega.client.stream.*;
 import io.pravega.client.stream.impl.JavaSerializer;
-import io.pravega.connectors.flink.FlinkExactlyOncePravegaWriter;
+import io.pravega.connectors.flink.FlinkPravegaWriter;
 import io.pravega.connectors.flink.PravegaEventRouter;
+import io.pravega.connectors.flink.PravegaWriterMode;
 import io.pravega.connectors.flink.serialization.PravegaSerialization;
 import io.pravega.connectors.flink.util.FlinkPravegaParams;
 import io.pravega.connectors.flink.util.StreamId;
@@ -86,16 +87,18 @@ public class StreamUtils {
 	}
 
 	// TODO move these methods to FlinkPravegaParams class
-	public <T extends Serializable> FlinkExactlyOncePravegaWriter<T> newExactlyOnceWriter(final StreamId stream,
+	public <T extends Serializable> FlinkPravegaWriter<T> newExactlyOnceWriter(final StreamId stream,
 																	final Class<T> eventType,
 																	final PravegaEventRouter<T> router) {
 		return newExactlyOnceWriter(stream, PravegaSerialization.serializationFor(eventType), router);
 	}
 
-	public <T extends Serializable> FlinkExactlyOncePravegaWriter<T> newExactlyOnceWriter(final StreamId stream,
+	public <T extends Serializable> FlinkPravegaWriter<T> newExactlyOnceWriter(final StreamId stream,
 																			   final SerializationSchema<T> serializationSchema,
 																			   final PravegaEventRouter<T> router) {
-		return new FlinkExactlyOncePravegaWriter<T>(getControllerUri(), stream.getScope(), stream.getName(), serializationSchema, router);
+		FlinkPravegaWriter writer = new FlinkPravegaWriter<T>(getControllerUri(), stream.getScope(), stream.getName(), serializationSchema, router);
+		writer.setPravegaWriterMode(PravegaWriterMode.EXACTLY_ONCE);
+		return writer;
 	}
 
 
