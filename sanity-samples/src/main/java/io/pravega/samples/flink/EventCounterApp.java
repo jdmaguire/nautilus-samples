@@ -11,7 +11,6 @@
 package io.pravega.samples.flink;
 
 import io.pravega.client.stream.*;
-import io.pravega.connectors.flink.FlinkExactlyOncePravegaWriter;
 import io.pravega.connectors.flink.FlinkPravegaReader;
 import io.pravega.connectors.flink.FlinkPravegaWriter;
 import io.pravega.connectors.flink.PravegaWriterMode;
@@ -67,7 +66,7 @@ public class EventCounterApp {
 		env.setRestartStrategy(RestartStrategies.fixedDelayRestart(restartAttempts, delayBetweenAttempts));
 
 		// Pravega Writer
-		FlinkExactlyOncePravegaWriter<Integer> pravegaExactlyOnceWriter = streamUtils.newExactlyOnceWriter(outStreamId,
+		FlinkPravegaWriter<Integer> pravegaExactlyOnceWriter = streamUtils.newExactlyOnceWriter(outStreamId,
 				Integer.class, new IdentityRouter<>());
 
 		env
@@ -113,7 +112,7 @@ public class EventCounterApp {
 		final FlinkPravegaReader<Integer> pravegaSource = streamUtils.getFlinkPravegaParams().newReader(inStreamId, startTime, Integer.class);
 
 		// Pravega Writer
-		FlinkExactlyOncePravegaWriter<Integer> pravegaExactlyOnceWriter = streamUtils.newExactlyOnceWriter(outStreamId,
+		FlinkPravegaWriter<Integer> pravegaExactlyOnceWriter = streamUtils.newExactlyOnceWriter(outStreamId,
 				Integer.class, new IdentityRouter<>());
 
 		DataStream<Integer> stream =
